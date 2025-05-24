@@ -4,12 +4,14 @@
         :style="{ display: 'grid', gridTemplateColumns: `repeat(${num}, 50px)`, gridTemplateRows: `repeat(${num}, 50px)` }"
         style="justify-content: center;">
         <div v-for="i in num * num" :key="i">
-            <div :class="knightPass.includes(i) ? 'squarePass' : 'square'"
-                @click="goToSquare(Math.floor((i - 1) / num), (i - 1) % num, i)">
+            <div :class="knightPass.includes(i) ? 'squarePass' : 'square'" @dragover.prevent
+                @drop="goToSquare(Math.floor((i - 1) / num), (i - 1) % num, i)">
 
+                <!-- Hiển thị con mã -->
                 <div v-if="Math.floor((i - 1) / num) == knight.knightRow && (i - 1) % num == knight.knightCol"
                     style="position: absolute">
-                    <img style="height: 50px; width: 50px;border-bottom: 1.5px solid black;border-right: 1.5px solid black;"
+                    <img draggable="true" @dragstart="onDragStart"
+                        style="height: 50px; width: 50px;border-bottom: 1.5px solid black;border-right: 1.5px solid black;"
                         src="../assets/DarkKnight.webp">
                 </div>
             </div>
@@ -27,6 +29,7 @@ const route = useRoute();
 const knight = useKnightStore();
 const num = ref(0);
 const knightPass = ref([])
+let dragged = ref(null);
 
 onMounted(async () => {
     if (route.params.id) {
@@ -55,6 +58,19 @@ function setKnightPass(index) {
     console.log(knightPass.value)
 }
 
+
+function onDragStart(e) {
+  dragged.value = {
+    row: knight.knightRow,
+    col: knight.knightCol,
+  };
+}
+
+function onDrop(newRow, newCol, index) {
+  // Bạn có thể thêm điều kiện hợp lệ tại đây nếu muốn
+  knight.moveKnight(newRow, newCol);
+  setKnightPass(index);
+}
 </script>
 
 <style scoped>
@@ -73,5 +89,9 @@ function setKnightPass(index) {
     border: 1px solid black;
     color: red;
     background-color: red;
+}
+img {
+  cursor: grab;
+  user-select: none;
 }
 </style>
